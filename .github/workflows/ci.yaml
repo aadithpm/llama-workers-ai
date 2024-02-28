@@ -1,0 +1,26 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+name: Deploy
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npm run lint
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Workers
+    needs: [test, lint]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
